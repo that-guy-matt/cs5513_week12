@@ -2,7 +2,7 @@
 import Layout from '../../components/layout';
 
 // Import helper functions to fetch data from JSON
-import { getAllPostIds, getPostData } from '../../lib/posts-json';
+import { getAllPostIds, getPostData } from '../../lib/posts';
 
 // Import Next.js <Head> for setting metadata (title, etc.)
 import Head from 'next/head';
@@ -30,8 +30,8 @@ export async function getStaticProps({ params }) {
 // --- Next.js data fetching: getStaticPaths ---
 // Tells Next.js which dynamic routes to pre-render at build time
 export async function getStaticPaths() {
-    // Get all post IDs from JSON
-    const paths = getAllPostIds();
+    // Get all post IDs from WordPress API (await the async function)
+    const paths = await getAllPostIds();
     return {
         paths,          // List of routes: e.g. [{ params: { id: '1' } }, ...]
         fallback: false // Any path not returned here will 404
@@ -52,32 +52,13 @@ export default function Post({ postData }) {
                 {/* Post Title */}
                 <h1 className={utilStyles.headingX1}>{postData.title}</h1>
 
-                {/* Post Date (formatted via custom Date component) */}
+                {/* Post Date */}
                 <div className={utilStyles.lightText}>
                     <Date dateString={postData.date} />
                 </div>
 
-                {/* Post Body Content */}
-                <div>
-                    {/* Short description/summary */}
-                    <p>{postData.description}</p>
-
-                    {/* Ingredients list */}
-                    <h2>Ingredients</h2>
-                    <ul>
-                        {postData.ingredients.map((ingredient, index) => (
-                            <li key={index}>{ingredient}</li>
-                        ))}
-                    </ul>
-
-                    {/* Step-by-step instructions */}
-                    <h2>Instructions</h2>
-                    <ol>
-                        {postData.instructions.map((instruction, index) => (
-                            <li key={index}>{instruction}</li>
-                        ))}
-                    </ol>
-                </div>
+                {/* Render post content from wp */}
+                <div dangerouslySetInnerHTML={{__html: postData.content}} />
             </article>
         </Layout>
     );
